@@ -146,10 +146,11 @@ def debug():
     map_api.set_zoom(18)
     Image.open(map_api.get_image()).show()
 
-    # чуть сдвигаем, меняем на спутник, добавляем 2 точки
+    # чуть сдвигаем, меняем на спутник, добавляем 2 точки и отдаляемся
     map_api.move_up()
     map_api.move_right()
     map_api.set_style("sat")
+    map_api.zoom_in(-1)
     map_api.add_pin("некрасовская 50")
     map_api.add_pin("некрасовская 48А")
     Image.open(map_api.get_image()).show()
