@@ -28,27 +28,11 @@ class MapDisplay(QMainWindow):
         self.display.setScene(scene)
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_W: #вверх
-            self.map_api.move_up()
-            self.update()
-
-        if event.key() == Qt.Key_S: #вниз
-            self.map_api.move_down()
-            self.update()
-
-        if event.key() == Qt.Key_A: #влево
-            self.map_api.move_left()
-            self.update()
-
-        if event.key() == Qt.Key_D: #вправо
-            self.map_api.move_right()
-            self.update()
-
-        if event.key() == Qt.Key_R: #приближение
+        if event.key() == Qt.Key_W: #приближение
             self.map_api.zoom_in(1)
             self.update()
 
-        if event.key() == Qt.Key_F: #отдаление
+        if event.key() == Qt.Key_S: #отдаление
             self.map_api.zoom_in(-1)
             self.update()
 
