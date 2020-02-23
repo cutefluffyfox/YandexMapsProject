@@ -32,6 +32,8 @@ class MapDisplay(QMainWindow):
         self.map_api = MapAPI(self.place)
         self.map_api.set_zoom(10)
         self.name = f"map_{str(len(listdir(RESULTS)) + 1)}.png"
+        place = self.place
+        self.map_api.add_pin(place)
 
     def update(self):
         img = Image.open(self.map_api.get_image())
