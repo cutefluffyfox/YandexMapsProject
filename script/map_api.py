@@ -1,6 +1,7 @@
 from io import BytesIO
+
 import requests
-from pprint import pprint
+from math import cos, radians, sqrt
 
 
 class MapAPI:
@@ -13,8 +14,6 @@ class MapAPI:
     def __init__(self, address: str, map_size="650,450"):
         self.address = ""
         self.map_size = map_size
-        self.__json = dir()
-        self.__object_json = dict()
         self.__cords = ""
         self.__zoom = 2
         self.__style = "map"
@@ -24,9 +23,7 @@ class MapAPI:
 
     def set_address(self, address: str):
         self.address = address
-        self.__json = self.__get_json(self.address)
-        self.__object_json = self.__get_object_json(self.__json)
-        self.__cords = self.__get_cords(self.__object_json)
+        self.__cords = self.__get_cords(self.__get_object_json(self.__get_json(self.address)))
         self.__zoom = 2
         self.__pin = []
         self.__image = None
@@ -84,9 +81,28 @@ class MapAPI:
     def get_full_data(self) -> dict:
         object_json = self.__get_object_json(self.__get_json(self.__cords))
         return {
-            "address": object_json['metaDataProperty']['GeocoderMetaData']['Address']['formatted'],
-            "postal_code": object_json['metaDataProperty']['GeocoderMetaData']['Address']['postal_code'],
+            "address": self.__get_address(object_json),
+            "postal_code": object_json['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
         }
+
+    def add_pin_by_click(self, img_x: int, img_y: int) -> str:
+        img_mid_x, img_mid_y = map(lambda a: a // 2, self.__str_to_list(self.map_size))
+        map_mid_x, map_mid_y = self.__str_to_list(self.__cords)
+        dx = img_x - img_mid_x
+        dy = img_y - img_mid_y
+        delta_y = 0.0000039 * pow(2, 18 - self.__zoom)
+        delta_x = 0.0000053 * pow(2, 18 - self.__zoom)
+        pin_cords = [map_mid_x + dx * delta_x, map_mid_y - dy * delta_y]
+        address = self.__get_address(self.__get_object_json(self.__get_json(self.__list_to_str(pin_cords))))
+        try:
+            info = self.__get_organization_data(
+                self.__get_organization_object_json(self.__get_organization_json(address)))
+            if self.__lonlat_distance(info['cords'], pin_cords) <= 50:
+                self.__pin.append(self.__list_to_str(info['cords']) + ",pm2rdm")
+                return info['name']
+        except IndexError:
+            pass
+        return ""
 
     def __get_json(self, address: str) -> dict:
         params = {
@@ -103,6 +119,10 @@ class MapAPI:
     @staticmethod
     def __get_cords(object_json: dict) -> str:
         return object_json['Point']['pos'].replace(" ", ",")
+
+    @staticmethod
+    def __get_address(object_json: dict) -> str:
+        return object_json['metaDataProperty']['GeocoderMetaData']['Address']['formatted']
 
     def __move(self, x=0, y=0):
         new_cords = self.__str_to_list(self.__cords)
@@ -125,6 +145,38 @@ class MapAPI:
     def __auto_change(self) -> float:
         return 0.0006 * pow(2, 18 - self.__zoom)
 
+    def __get_organization_json(self, address: str) -> dict:
+        params = {
+            "apikey": self.search_api_token,
+            "text": address,
+            "lang": "ru",
+            "type": "biz",
+        }
+        return requests.get(self.search_api_server, params=params).json()
+
+    @staticmethod
+    def __get_organization_object_json(json: dict) -> dict:
+        return json['features'][0]
+
+    @staticmethod
+    def __get_organization_data(object_json: dict) -> dict:
+        return {
+            'name': object_json['properties']['name'],
+            'cords': object_json['geometry']['coordinates']
+        }
+
+    @staticmethod
+    def __lonlat_distance(pos1: (float, float), pos2: (float, float)) -> float:
+        degree_to_meters_factor = 111 * 1000  # 111 километров в метрах
+        a_lon, a_lat = pos1
+        b_lon, b_lat = pos2
+        radians_lattitude = radians((a_lat + b_lat) / 2.)
+        lat_lon_factor = cos(radians_lattitude)
+        dx = abs(a_lon - b_lon) * degree_to_meters_factor * lat_lon_factor
+        dy = abs(a_lat - b_lat) * degree_to_meters_factor
+        distance = sqrt(dx * dx + dy * dy)
+        return distance
+
     @staticmethod
     def __str_to_list(data: str) -> [float, float]:
         return list(map(float, data.split(",")))
@@ -132,37 +184,3 @@ class MapAPI:
     @staticmethod
     def __list_to_str(data: [float, float]) -> str:
         return f"{data[0]},{data[1]}"
-
-    def __auto_spn(self) -> str:
-        lower = self.__str_to_list(self.__object_json['boundedBy']['Envelope']['lowerCorner'].replace(" ", ","))
-        upper = self.__str_to_list(self.__object_json['boundedBy']['Envelope']['upperCorner'].replace(" ", ","))
-        return f"{abs(upper[0] - lower[0])},{abs(upper[1] - lower[1])}"
-
-
-def debug():
-    from PIL import Image
-    # нацеливаемся на адресс
-    map_api = MapAPI("Океанский просп., 17, Владивосток")
-    map_api.set_zoom(18)
-    Image.open(map_api.get_image()).show()
-
-    # чуть сдвигаем, меняем на спутник, добавляем 2 точки и отдаляемся
-    map_api.move_up()
-    map_api.move_right()
-    map_api.set_style("sat")
-    map_api.zoom_in(-1)
-    map_api.add_pin("некрасовская 50")
-    map_api.add_pin("некрасовская 48А")
-    Image.open(map_api.get_image()).show()
-
-    # убираем точки и меняем на карту
-    map_api.clear_pin()
-    map_api.set_style("map")
-    Image.open(map_api.get_image()).show()
-
-    # получение информации об объекте
-    pprint(map_api.get_full_data())
-
-
-if __name__ == '__main__':
-    debug()
