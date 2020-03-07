@@ -8,6 +8,7 @@ from PyQt5.QtGui import QPixmap
 UI = join(split(getcwd())[0], "ui")
 from script.map_api import MapAPI
 from PIL import Image
+
 RESULTS = join(split(getcwd())[0], "results")
 
 
@@ -50,27 +51,27 @@ class MapDisplay(QMainWindow):
         self.place = ''
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_W: #вверх
+        if event.key() == Qt.Key_W:  # вверх
             self.map_api.move_up()
             self.update()
 
-        if event.key() == Qt.Key_S: #вниз
+        if event.key() == Qt.Key_S:  # вниз
             self.map_api.move_down()
             self.update()
 
-        if event.key() == Qt.Key_A: #влево
+        if event.key() == Qt.Key_A:  # влево
             self.map_api.move_left()
             self.update()
 
-        if event.key() == Qt.Key_D: #вправо
+        if event.key() == Qt.Key_D:  # вправо
             self.map_api.move_right()
             self.update()
 
-        if event.key() == Qt.Key_R: #приближение
+        if event.key() == Qt.Key_R:  # приближение
             self.map_api.zoom_in(1)
             self.update()
 
-        if event.key() == Qt.Key_F: #отдаление
+        if event.key() == Qt.Key_F:  # отдаление
             self.map_api.zoom_in(-1)
             self.update()
 
