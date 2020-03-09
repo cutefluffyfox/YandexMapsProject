@@ -15,13 +15,15 @@ RESULTS = join(split(getcwd())[0], "results")
 class MapDisplay(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi(join(UI, "map_output_extra1.ui"), self)
+        uic.loadUi(join(UI, "map_output_extra4.ui"), self)
         self.find_b.clicked.connect(self.find_place)
         self.clear_b.clicked.connect(self.cancel)
-
+        self.index_b.clicked.connect(self.index)
         self.hybrid_rb.toggled.connect(self.hybrid)
         self.satellite_rb.toggled.connect(self.satellite)
         self.scheme_rb.toggled.connect(self.scheme)
+
+        self.chc = 1
 
     def find_place(self):
         self.place = self.place_input.text()
@@ -29,6 +31,18 @@ class MapDisplay(QMainWindow):
             return
         self.form_map()
         self.update()
+        self.index()
+
+    def index(self):
+        self.chc += 1
+        if self.chc % 2 == 0:
+            ad = " ".join(list(map(str, self.map_api.get_full_data().values())))
+            self.index_b.setText("Скрыть индекс")
+        else:
+            ad = " ".join(list(map(str, self.map_api.get_full_data().values()))[:-1])
+            self.index_b.setText("Показать индекс")
+
+        self.adress_d.setText(ad)
 
     def form_map(self):
         self.map_api = MapAPI(self.place)

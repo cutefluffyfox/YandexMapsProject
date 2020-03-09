@@ -15,7 +15,7 @@ RESULTS = join(split(getcwd())[0], "results")
 class MapDisplay(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi(join(UI, "map_output_extra1.ui"), self)
+        uic.loadUi(join(UI, "map_output_extra2.ui"), self)
         self.find_b.clicked.connect(self.find_place)
         self.clear_b.clicked.connect(self.cancel)
 
@@ -29,6 +29,8 @@ class MapDisplay(QMainWindow):
             return
         self.form_map()
         self.update()
+        ad = " ".join(list(map(str, self.map_api.get_full_data().values())))
+        self.adress_d.setText(ad)
 
     def form_map(self):
         self.map_api = MapAPI(self.place)
