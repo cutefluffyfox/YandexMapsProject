@@ -85,7 +85,7 @@ class MapAPI:
             "postal_code": object_json['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
         }
 
-    def add_pin_by_click(self, img_x: int, img_y: int) -> str:
+    def add_pin_by_click(self, img_x: int, img_y: int) -> dict:
         img_mid_x, img_mid_y = map(lambda a: a // 2, self.__str_to_list(self.map_size))
         map_mid_x, map_mid_y = self.__str_to_list(self.__cords)
         dx = img_x - img_mid_x
@@ -99,10 +99,9 @@ class MapAPI:
                 self.__get_organization_object_json(self.__get_organization_json(address)))
             if self.__lonlat_distance(info['cords'], pin_cords) <= 50:
                 self.__pin.append(self.__list_to_str(info['cords']) + ",pm2rdm")
-                return info['name']
+                return info
         except IndexError:
-            pass
-        return ""
+            return {'error': 'nothing found'}
 
     def __get_json(self, address: str) -> dict:
         params = {
@@ -162,7 +161,8 @@ class MapAPI:
     def __get_organization_data(object_json: dict) -> dict:
         return {
             'name': object_json['properties']['name'],
-            'cords': object_json['geometry']['coordinates']
+            'cords': object_json['geometry']['coordinates'],
+            'kind': object_json['properties']['CompanyMetaData']['Categories'][0]['name']
         }
 
     @staticmethod
