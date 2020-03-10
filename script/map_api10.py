@@ -2,6 +2,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QApplication, QGraphicsScene
 import sys
+import os
 from os import getcwd, listdir
 from os.path import join, split
 from PyQt5.QtGui import QPixmap
@@ -26,11 +27,17 @@ class MapDisplay(QMainWindow):
         self.chc = 1
 
     def find_place(self):
+        res = listdir((RESULTS))
+        print(res, "до")
+        if len(res) > 1:
+            path = os.path.join(RESULTS, res[1])
+            os.remove(path)
+        print(res, "после")
         self.place = self.place_input.text()
         if self.place == "":
             return
         self.form_map()
-        self.update()
+        self.update2()
         self.index()
 
     def index(self):
@@ -44,6 +51,9 @@ class MapDisplay(QMainWindow):
 
         self.adress_d.setText(ad)
 
+    def paintEvent(self, QPaintEvent):
+        self.update()
+
     def form_map(self):
         self.map_api = MapAPI(self.place)
         self.map_api.set_zoom(10)
@@ -51,7 +61,7 @@ class MapDisplay(QMainWindow):
         place = self.place
         self.map_api.add_pin(place)
 
-    def update(self):
+    def update2(self):
         img = Image.open(self.map_api.get_image())
         img.save(join(split(getcwd())[0], f"results/{self.name}"))
         self.scene = QGraphicsScene()
@@ -67,48 +77,48 @@ class MapDisplay(QMainWindow):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_W:  # вверх
             self.map_api.move_up()
-            self.update()
+            self.update2()
 
         if event.key() == Qt.Key_S:  # вниз
             self.map_api.move_down()
-            self.update()
+            self.update2()
 
         if event.key() == Qt.Key_A:  # влево
             self.map_api.move_left()
-            self.update()
+            self.update2()
 
         if event.key() == Qt.Key_D:  # вправо
             self.map_api.move_right()
-            self.update()
+            self.update2()
 
         if event.key() == Qt.Key_R:  # приближение
             self.map_api.zoom_in(1)
-            self.update()
+            self.update2()
 
         if event.key() == Qt.Key_F:  # отдаление
             self.map_api.zoom_in(-1)
-            self.update()
+            self.update2()
 
     def scheme(self):
         self.find_place()
         if self.place == "":
             return
         self.map_api.set_style("map")
-        self.update()
+        self.update2()
 
     def satellite(self):
         self.find_place()
         if self.place == "":
             return
         self.map_api.set_style("sat")
-        self.update()
+        self.update2()
 
     def hybrid(self):
         self.find_place()
         if self.place == "":
             return
         self.map_api.set_style("sat,trf")
-        self.update()
+        self.update2()
 
 
 if __name__ == "__main__":
