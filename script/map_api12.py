@@ -1,6 +1,6 @@
 from PyQt5 import uic, QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QApplication, QGraphicsScene
+from PyQt5.QtWidgets import QMainWindow, QApplication, QGraphicsScene, QLineEdit
 import sys
 import os
 from os import getcwd, listdir
@@ -29,11 +29,11 @@ class MapDisplay(QMainWindow):
         self.hybrid_rb.toggled.connect(self.hybrid)
         self.satellite_rb.toggled.connect(self.satellite)
         self.scheme_rb.toggled.connect(self.scheme)
-
+        self.X_LINE = 10
+        self.Y_LINE = 220
         self.sc = False
         self.hyb = False
         self.sat = False
-
 
         self.chc = 1
 
@@ -86,9 +86,6 @@ class MapDisplay(QMainWindow):
 
         label_pixmap = QPixmap(join(split(getcwd())[0], f"results/{self.name}"))
         self.map_d.setPixmap(label_pixmap)
-        # self.scene = QGraphicsScene()
-        # self.scene.addPixmap(QPixmap(join(split(getcwd())[0], f"results/{self.name}")))
-        # self.display.setScene(self.scene)
 
     def cancel(self):
         self.place_input.clear()
@@ -123,10 +120,15 @@ class MapDisplay(QMainWindow):
             self.update2()
 
     def mousePressEvent(self, event):
+        self.place_input.clearFocus()
         if event.buttons() == QtCore.Qt.RightButton:
-            self.map_api.add_pin_by_click(event.pos().x(), event.pos().y())
-            print(self.map_api.add_pin_by_click(event.pos().x(), event.pos().y()))
-            self.adress_d.setText(" ".join(list((self.map_api.add_pin_by_click(event.pos().x(), event.pos().y())).values())))
+            print(self.map_api.add_pin_by_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE))
+            self.map_api.clear_pin()
+            self.map_api.add_pin_by_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE)
+            adr = list((self.map_api.add_pin_by_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE)).values())
+            self.adress_d.setText(" ".join(adr))
+            self.place_input.clear()
+            self.update2()
 
     def scheme(self):
         self.sat = False

@@ -97,9 +97,11 @@ class MapAPI:
         try:
             info = self.__get_organization_data(
                 self.__get_organization_object_json(self.__get_organization_json(address)))
-            if self.__lonlat_distance(info['cords'], pin_cords) <= 50:
+            if self.__lonlat_distance(info['cords'], pin_cords) <= 100:
                 self.__pin.append(self.__list_to_str(info['cords']) + ",pm2rdm")
+                info['cords'] = self.__list_to_str(info['cords'])
                 return info
+            raise IndexError
         except IndexError:
             return {'error': 'nothing found'}
 
