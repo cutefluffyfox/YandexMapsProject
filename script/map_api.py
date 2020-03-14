@@ -85,7 +85,7 @@ class MapAPI:
             "postal_code": object_json['metaDataProperty']['GeocoderMetaData']['Address']['postal_code']
         }
 
-    def add_pin_by_click(self, img_x: int, img_y: int) -> dict:
+    def add_pin_by_right_click(self, img_x: int, img_y: int) -> dict:
         img_mid_x, img_mid_y = map(lambda a: a // 2, self.__str_to_list(self.map_size))
         map_mid_x, map_mid_y = self.__str_to_list(self.__cords)
         dx = img_x - img_mid_x
@@ -102,6 +102,23 @@ class MapAPI:
                 info['cords'] = self.__list_to_str(info['cords'])
                 return info
             raise IndexError
+        except IndexError:
+            return {'error': 'nothing found'}
+
+    def add_pin_by_left_click(self, img_x: int, img_y: int) -> dict:
+        img_mid_x, img_mid_y = map(lambda a: a // 2, self.__str_to_list(self.map_size))
+        map_mid_x, map_mid_y = self.__str_to_list(self.__cords)
+        dx = img_x - img_mid_x
+        dy = img_y - img_mid_y
+        delta_y = 0.0000039 * pow(2, 18 - self.__zoom)
+        delta_x = 0.0000053 * pow(2, 18 - self.__zoom)
+        pin_cords = [map_mid_x + dx * delta_x, map_mid_y - dy * delta_y]
+        try:
+            object_json = self.__get_object_json(self.__get_json(self.__list_to_str(pin_cords)))
+            cords = self.__get_cords(object_json)
+            address = self.__get_address(object_json)
+            self.__pin.append(cords + ",pm2rdm")
+            return {'address': address, 'cords': cords}
         except IndexError:
             return {'error': 'nothing found'}
 
