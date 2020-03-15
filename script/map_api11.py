@@ -121,14 +121,14 @@ class MapDisplay(QMainWindow):
 
     def mousePressEvent(self, event):
         self.place_input.clearFocus()
-        if event.buttons() == QtCore.Qt.RightButton:
-            print(self.map_api.add_pin_by_right_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE))
-            self.map_api.clear_pin()
-            self.map_api.add_pin_by_right_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE)
-            adr = list((self.map_api.add_pin_by_right_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE)).values())
-            self.adress_d.setText(" ".join(adr))
-            self.place_input.clear()
-            self.update2()
+        # if event.buttons() == QtCore.Qt.RightButton:
+        #     print(self.map_api.add_pin_by_right_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE))
+        #     self.map_api.clear_pin()
+        #     self.map_api.add_pin_by_right_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE)
+        #     adr = list((self.map_api.add_pin_by_right_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE)).values())
+        #     self.adress_d.setText(" ".join(adr))
+        #     self.place_input.clear()
+        #     self.update2()
 
         if event.buttons() == QtCore.Qt.LeftButton:
             print(self.map_api.add_pin_by_left_click(event.pos().x() - self.X_LINE, event.pos().y() - self.Y_LINE))
