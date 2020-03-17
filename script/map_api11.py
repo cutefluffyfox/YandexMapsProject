@@ -89,10 +89,10 @@ class MapDisplay(QMainWindow):
 
     def cancel(self):
         self.place_input.clear()
-        self.find_place()
-        self.scene.clear()
-        self.adress_d.setText("                                                                  ")
+        self.map_api.clear_pin()
         self.place = ''
+        self.adress_d.setText("                                                                  ")
+        self.update()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_W:  # вверх
